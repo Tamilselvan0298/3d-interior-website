@@ -77,3 +77,4 @@ The optimized static assets will be output to the `dist/` folder.
 ## 📄 License
 
 MIT License. Designed and developed for Aura Architectural Atelier.
+

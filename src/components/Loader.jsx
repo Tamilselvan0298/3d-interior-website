@@ -33,16 +33,26 @@ export function Loader({ images, onDone }) {
     const completeLoader = () => {
       if (finished || cancelled) return;
       finished = true;
-      animateProgress(100, 0.4);
+      try {
+        animateProgress(100, 0.4);
 
-      const elapsed = (performance.now() - startTime) / 1000;
-      const delay = Math.max(0, 1.8 - elapsed);
+        const elapsed = (performance.now() - startTime) / 1000;
+        const delay = Math.max(0, 1.4 - elapsed);
 
-      gsap.timeline({ delay: delay + 0.2 })
-        .to(rootRef.current.querySelector('.loader__inner'), { y: -30, opacity: 0, duration: 0.6, ease: 'power3.in' })
-        .to(rootRef.current, { clipPath: 'inset(0 0 100% 0)', duration: 1.1, ease: 'expo.inOut' }, '-=0.15')
-        .add(() => onDone(), '-=0.7')
-        .set(rootRef.current, { display: 'none' });
+        if (!rootRef.current) {
+          onDone();
+          return;
+        }
+
+        const inner = rootRef.current.querySelector('.loader__inner');
+        gsap.timeline({ delay: delay + 0.15 })
+          .to(inner || {}, { y: -30, opacity: 0, duration: 0.6, ease: 'power3.in' })
+          .to(rootRef.current, { clipPath: 'inset(0 0 100% 0)', duration: 0.9, ease: 'expo.inOut' }, '-=0.15')
+          .add(() => onDone(), '-=0.6')
+          .set(rootRef.current, { display: 'none' });
+      } catch {
+        onDone();
+      }
     };
 
     let loaded = 0;
@@ -53,12 +63,12 @@ export function Loader({ images, onDone }) {
         if (cancelled) return;
         loaded += 1;
         animateProgress((loaded / total) * 95);
-        if (loaded === total) completeLoader();
+        if (loaded >= total) completeLoader();
       };
       img.src = src;
     });
 
-    const fallbackTimeout = setTimeout(completeLoader, 4500);
+    const fallbackTimeout = setTimeout(completeLoader, 3000);
 
     return () => {
       cancelled = true;
